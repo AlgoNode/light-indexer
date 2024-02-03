@@ -5,6 +5,7 @@ set -e
 cd `dirname $0`
 
 echo "initializing one-bash-indexer"
+chown -R 4160:4160 ../data-conduit
 sleep 5
 
 echo "1/4 initializing configs"
