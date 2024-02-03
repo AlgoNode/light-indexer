@@ -1,0 +1,12 @@
+#!/bin/bash
+cd `dirname $0`
+
+echo "upgrading light-indexer"
+
+git pull
+
+./pull 
+./gencfg
+./down
+./up
+
