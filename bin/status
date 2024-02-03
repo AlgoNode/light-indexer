@@ -1,0 +1,13 @@
+#!/bin/bash
+
+cd `dirname $0`
+set -a
+source defaults.env
+source .env
+
+NODELY=$(curl -s https://mainnet-api.algonode.cloud/v2/status |jq '."last-round"')
+MYROUND=$(curl -s -H "x-indexer-api-token: $IDX_API_TOKEN" http://$IDX_API_BIND/health |jq '.round')
+lag=$(($NODELY - $MYROUND))
+
+echo "Lag: $lag , local $MYROUND, Nodely: $NODELY"
+

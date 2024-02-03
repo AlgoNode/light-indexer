@@ -1,0 +1,4 @@
+bin/.env
+*~
+data-cockroach/*
+data-conduit/*

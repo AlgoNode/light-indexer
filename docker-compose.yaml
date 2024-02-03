@@ -1,0 +1,61 @@
+version: "3.8"
+services:
+  database:
+    image: cockroachdb/cockroach:latest
+    container_name: cdb-idx-${NETWORK}
+    restart: always
+    ports:
+      - "${DB_SQL_BIND}:26257"
+      - "${DB_UI_BIND}:8080"
+    command: start-single-node --insecure --cache=${DB_CACHE} 
+    volumes:
+      - type: bind
+        source: ${DB_VOL}
+        target: /cockroach/cockroach-data
+    logging:
+      driver: local
+      options:
+        max-size: "20m"
+        max-file: "2"
+        compress: "false"
+  conduit:
+    container_name: idx-${NETWORK}-cdb
+    image: urtho/conduit-cdb:latest
+    restart: always
+    volumes:
+      - type: bind
+        source: ./data-conduit
+        target: /data
+    depends_on:
+      - database
+    entrypoint:
+      - "/app/conduit"
+      - "-d"
+      - "/data"
+    logging:
+      driver: local
+      options:
+        max-size: "20m"
+        max-file: "2"
+        compress: "false"
+  api:
+    container_name: idx-api-${NETWORK}
+    image: urtho/algo-indexer-api-cdb:latest
+    ports:
+      - "${IDX_API_BIND}:8980"
+    restart: always
+    depends_on:
+      - database
+    environment:
+      - 'INDEXER_POSTGRES_CONNECTION_STRING=host=cdb-idx-${NETWORK} port=26257 user=root dbname=ledgerdb sslmode=disable'
+      - 'INDEXER_API_TOKEN=${IDX_API_TOKEN}'
+      - 'INDEXER_MAX_CONN=60'
+      - 'INDEXER_SERVER_ADDRESS=:8980'
+    entrypoint:
+      - "/app/algorand-indexer"
+      - "daemon"
+      - "--enable-all-parameters"
+      - "--max-api-resources-per-account"
+      - "100000"
+      - "--max-transactions-limit"
+      - "1000000"

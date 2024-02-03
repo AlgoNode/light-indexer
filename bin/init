@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -e
+
+cd `dirname $0`
+
+echo "initializing one-bash-indexer"
+sleep 5
+
+echo "1/4 initializing configs"
+./gencfg
+echo "2/4 pulling images"
+./pull > error.log
+rm -f error.log
+echo "3/4 downloading snapshot and starting up indexer"
+./catchup
+
+./status
+sleep 1
+./status
+sleep 1
+./status
+sleep 1
+./status
+sleep 1
+
+echo "4/4 catching up in the background, check status with bin/status"

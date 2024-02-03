@@ -1,0 +1,73 @@
+#!/bin/bash
+cd `dirname $0`
+set -a
+source defaults.env
+source .env
+SQLCLI="docker exec -it cdb-idx-$NETWORK cockroach sql -d defaultdb --insecure --embedded -e"
+
+echo -n "making sure that only database is up..."
+set -e 
+./up database 2> error.log
+./down conduit 2> /dev/null >/dev/null
+./down api 2> /dev/null >/dev/null
+sleep 5
+echo "OK"
+
+echo -n "dropping database..."
+$SQLCLI "set sql_safe_updates=false; drop database if exists ledgerdb" > error.log
+$SQLCLI "SET CLUSTER SETTING kv.range.backpressure_range_size_multiplier=0;" > error.log
+echo "OK"
+
+echo -n "initiating DB snapshot restore from Nodely.io cloud (20GB)..."
+$SQLCLI "RESTORE DATABASE defaultdb FROM LATEST in 'https://snap.nodely.io/conduit-main/hourly/' WITH new_db_name = 'ledgerdb', DETACHED;" > error.log
+echo "OK"
+
+bar_size=40
+bar_char_done="#"
+bar_char_todo="-"
+bar_percentage_scale=0
+
+function show_progress {
+    current="$1"
+    total="$2"
+
+    percent=$(bc <<< "scale=$bar_percentage_scale; 100 * $current / $total" )
+    done=$(bc <<< "scale=0; $bar_size * $percent / 100" )
+    todo=$(bc <<< "scale=0; $bar_size - $done" )
+
+    done_sub_bar=$(printf "%${done}s" | tr " " "${bar_char_done}")
+    todo_sub_bar=$(printf "%${todo}s" | tr " " "${bar_char_todo}")
+
+    echo -ne "\rProgress : [${done_sub_bar}${todo_sub_bar}] ${percent}%"
+
+    if [ $total -eq $current ]; then
+        echo -e "\nDONE"
+    fi
+}
+
+set +e
+
+while true; do
+  RESTORE_STATUS=$(curl -s "http://$DB_UI_BIND/_admin/v1/jobs?type=2&limit=1")
+  running=$(grep -nE '"status": "running"' <<< "$RESTORE_STATUS")
+  if [ -z "$running" ]; then    
+    break
+  fi
+  FC=$(awk '/fractionCompleted/{printf "%.0f", $2*100}' <<< "$RESTORE_STATUS")
+  show_progress $FC 100  
+  sleep 1
+done
+
+if grep -q failed <<< "$RESTORE_STATUS" ; then
+  grep error <<< "$RESTORE_STATUS"
+  cat > error.log <<< "$RESTORE_STATUS"
+  exit 1
+fi
+
+
+echo -n "starting up conduit and api..."
+sleep 1
+./up > error.log
+echo "OK"
+
+rm -f error.log

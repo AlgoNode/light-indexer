@@ -1,0 +1,14 @@
+#!/bin/bash
+
+cd `dirname $0`
+set -a
+source defaults.env
+source .env
+
+while read s;
+do
+  TAPI="${s#*/}"
+  curl -s -o /dev/null  -w "%{time_total}" -H "x-indexer-api-token: $IDX_API_TOKEN" http://$IDX_API_BIND/$TAPI
+  echo " : $TAPI" 
+done 
+

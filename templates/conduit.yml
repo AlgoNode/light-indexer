@@ -1,0 +1,24 @@
+log-level: INFO
+retry-count: 3600
+retry-delay: "1s"
+hide-banner: false
+metrics:
+    mode: OFF
+    addr: ":9999"
+    prefix: "conduit"
+importer:
+    name: ndlycloud
+    config:
+        netaddr: "${CONDUIT_FOLLOWER}"
+        token: "${NODLY_TOKEN}"
+processors:
+exporter:
+    name: cockroachdb
+    config:
+        connection-string: "${CONDUIT_DBURI}"
+        max-conn: 20
+        delete-task:
+            interval: 300
+            rounds: ${CONDUIT_HISTORY}
+telemetry:
+  enabled: false

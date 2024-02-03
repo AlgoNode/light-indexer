@@ -1,0 +1,16 @@
+#!/bin/bash
+
+cd `dirname $0`
+set -a
+source defaults.env
+source .env
+
+#remote leading / from the API path
+API="${1:-health}"
+TAPI="${API#*/}"
+
+JQPATH=$(which jq)
+JQ="${JQPATH:-cat}"
+
+curl -s -H "x-indexer-api-token: $IDX_API_TOKEN" http://$IDX_API_BIND/$TAPI|$JQ
+

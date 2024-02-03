@@ -1,0 +1,15 @@
+#!/bin/bash
+
+cd `dirname $0`
+set -a
+source defaults.env
+source .env
+
+if [ ! -f .env ]; then
+  export IDX_API_TOKEN=$(openssl rand -hex 16)
+  echo "INITIALIZED=1" > .env
+  echo "IDX_API_TOKEN=$IDX_API_TOKEN" >> .env
+fi
+
+envsubst < ../templates/conduit.yml > ../data-conduit/conduit.yml
+
