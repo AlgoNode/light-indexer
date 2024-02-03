@@ -26,3 +26,6 @@ sleep 1
 sleep 1
 
 echo "4/4 catching up in the background, check status with bin/status"
+
+./help
+
