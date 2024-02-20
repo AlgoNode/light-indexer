@@ -3,6 +3,8 @@
 set -e
 
 cd `dirname $0`
+mkdir -p ../data-cockroach
+mkdir -p ../data-conduit
 
 echo "initializing one-bash-indexer"
 chown -R 4160:4160 ../data-conduit
