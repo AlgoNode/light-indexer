@@ -1,0 +1,45 @@
+#!/bin/bash
+
+echo "deleting current database & indexer state..."
+sleep 5
+
+cd `dirname $0`
+set -a
+source defaults.env
+source .env
+
+docker compose -f ../docker-compose.yaml rm -sf $1
+rm -rf ../data-cockroach
+rm -rf ../data-conduit
+
+set -e
+
+cd `dirname $0`
+mkdir -p ../data-cockroach
+mkdir -p ../data-conduit
+
+echo "initializing one-bash-indexer"
+chown -R 4160:4160 ../data-conduit
+sleep 5
+
+echo "1/4 initializing configs"
+./gencfg
+echo "2/4 pulling images"
+./pull > error.log
+rm -f error.log
+echo "3/4 downloading snapshot and starting up indexer"
+./catchup
+
+./status
+sleep 1
+./status
+sleep 1
+./status
+sleep 1
+./status
+sleep 1
+
+echo "4/4 catching up in the background, check status with bin/status"
+
+./help
+
