@@ -18,8 +18,8 @@ $SQLCLI "set sql_safe_updates=false; drop database if exists ledgerdb" > error.l
 $SQLCLI "SET CLUSTER SETTING kv.range.backpressure_range_size_multiplier=0;" > error.log
 echo "OK"
 
-echo -n "initiating DB snapshot restore from Nodely.io cloud (20GB)..."
-$SQLCLI "RESTORE DATABASE defaultdb FROM LATEST in 'https://snap.nodely.io/conduit-main/hourly/' WITH new_db_name = 'ledgerdb', DETACHED;" > error.log
+echo -n "initiating DB snapshot restore from Nodely.io cloud (~20GB)..."
+$SQLCLI "RESTORE DATABASE defaultdb FROM LATEST in 'http://s3.nodely.io:9000/li-algo-mainnet/hourly/' WITH new_db_name = 'ledgerdb', DETACHED;" > error.log
 echo "OK"
 
 bar_size=40
