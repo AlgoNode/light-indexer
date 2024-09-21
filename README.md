@@ -1,7 +1,8 @@
 # Algorand Light Indexer
 
 Host you own Algorand indexer API in under 15 minutes:
-* 100% compatible with upstream Indexer API
+* 100% backward compatible with upstream Indexer API
+* Additional functionality, not yet implemented in the upstream indexer 
 * Even faster than Nodely.io cloud service
 * Requires <25GB of SSD 
 * *[optionally]* Go fully independent by adding a follower node
@@ -24,6 +25,9 @@ Host you own Algorand indexer API in under 15 minutes:
   * Faster pagination
   * Faster everything ;)
   * https://github.com/AlgoNode/indexer-api-cdb
+  * Extra functionality:
+    - Search by [group-id](https://editor.swagger.io/?url=https://raw.githubusercontent.com/AlgoNode/indexer-api-cdb/refs/heads/main/api/indexer.oas3.yml)
+    - Accelerated searches for `after-time` filter
 * Cloudflare hosted  DB snapshots (up to 3 hrs old) for fast catchup
 
 ## TODO
