@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   database:
-    image: cockroachdb/cockroach:latest
+    image: cockroachdb/cockroach:latest-v24.3
     container_name: cdb-idx-${NETWORK}
     restart: always
     ports:
